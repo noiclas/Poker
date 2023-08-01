@@ -27,6 +27,9 @@ def determineHand(hand,table):
 	if fourOfKind[0]:
 		print("4 OF A KIND, "+str(fourOfKind[1]))
 		return (FOUR_OF_A_KIND, fourOfKind[1])
+	if threeOfKind[0] and pairs[0]:
+		print("FULL HOUSE")
+		return FULL_HOUSE,[threeOfKind[1].pop(),pairs[1].pop()]
 	elif is_flush[0]:
 		print("FLUSH, "+ str(is_flush[1])+" HIGH.")
 		return (FLUSH, is_flush[1])
