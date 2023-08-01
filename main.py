@@ -52,14 +52,24 @@ def draw_table(table):
 	for i in range(len(table)):
 		window.blit(pygame.transform.scale(CARDS[table[i][0]+str(table[i][1])], (cardWidth/4, cardHeight/4)),(TABLEX*(i+1),TABLEY))
 
-# Blits the players' hands on the window
+# Blits the players' hands on the window. Only up to 4 players for now
 def draw_hands(hands):
-	return
+	for i in range(len(hands)):
+		if i < 2:
+			window.blit(pygame.transform.scale(CARDS[hands[i][0][0]+str(hands[i][0][1])], 
+				(cardWidth/4, cardHeight/4)),(TABLEX*(1+3*(i%2)),TABLEY-3*cardHeight/8))
+			window.blit(pygame.transform.scale(CARDS[hands[i][1][0]+str(hands[i][1][1])], 
+				(cardWidth/4, cardHeight/4)),(TABLEX*(2+3*(i%2)),TABLEY-3*cardHeight/8))
+		else:
+			window.blit(pygame.transform.scale(CARDS[hands[i][0][0]+str(hands[i][0][1])], 
+				(cardWidth/4, cardHeight/4)),(TABLEX*(1+3*(i%2)),TABLEY+3*cardHeight/8))
+			window.blit(pygame.transform.scale(CARDS[hands[i][1][0]+str(hands[i][1][1])], 
+				(cardWidth/4, cardHeight/4)),(TABLEX*(2+3*(i%2)),TABLEY+3*cardHeight/8))
 
 		
 
 def main():
-	NPLAYERS = 1
+	NPLAYERS = 4
 	game = PokerGame(NPLAYERS)
 	done = False
 	COUNT = 0
@@ -94,15 +104,16 @@ def main():
 		else:
 			COUNT =0
 		if HANDS:
-			window.blit(pygame.transform.scale(CARDS[game.hands[0][0][0]+str(game.hands[0][0][1])], (cardWidth/4, cardHeight/4)),(TABLEX*(1),TABLEY+cardHeight/4))
-			window.blit(pygame.transform.scale(CARDS[game.hands[0][1][0]+str(game.hands[0][1][1])], (cardWidth/4, cardHeight/4)),(TABLEX*(2),TABLEY+cardHeight/4))
+			draw_hands(game.hands)
+			#window.blit(pygame.transform.scale(CARDS[game.hands[0][0][0]+str(game.hands[0][0][1])], (cardWidth/4, cardHeight/4)),(TABLEX*(1),TABLEY+cardHeight/4))
+			#window.blit(pygame.transform.scale(CARDS[game.hands[0][1][0]+str(game.hands[0][1][1])], (cardWidth/4, cardHeight/4)),(TABLEX*(2),TABLEY+cardHeight/4))
 
 		draw_table(game.table)
 		#Update the pygame window
 		pygame.display.update()
 
-		#Force FPS to be 30 
-		clk.tick(30)
+		#Force FPS to be 60 
+		clk.tick(60)
 
 	pygame.quit()
 	sys.exit()

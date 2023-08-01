@@ -26,19 +26,26 @@ def determineHand(hand,table):
 
 	if fourOfKind[0]:
 		print("4 OF A KIND, "+str(fourOfKind[1]))
+		return (FOUR_OF_A_KIND, fourOfKind[1])
 	elif is_flush[0]:
 		print("FLUSH, "+ str(is_flush[1])+" HIGH.")
+		return (FLUSH, is_flush[1])
 	elif is_straight[0]:
 		print("STRAIGHT, "+str(is_straight[1])+" HIGH.")
+		return (STRAIGHT, is_straight[1])
 	elif threeOfKind[0]:
 		print("3 OF A KIND, "+str(threeOfKind[1]))
+		return THREE_OF_A_KIND, threeOfKind[1]
 	elif pairs[0]:
-		if len(pairs[1])==1:
-			print("PAIR, "+str(pairs[1])+".")
-		elif len(pairs[1])==2:
+		if len(pairs[1])==2:
 			print("TWO PAIR, " +str(pairs[1])+".")
+			return (TWO_PAIR, pairs[1][0])
+		elif len(pairs[1])==1:
+			print("PAIR, "+str(pairs[1])+".")
+			return (PAIR, pairs[1][0])
 	else:
 		print("HIGH CARD, " +str(max(card[1] for card in hand)))
+		return HIGH_CARD, max(card[1] for card in hand)
 
 
 

@@ -1,3 +1,4 @@
+import numpy as np
 from deck import Deck
 from handDeterminer import *
 
@@ -11,6 +12,7 @@ class PokerGame():
 		self.nPlayers = nPlayers
 		self.hands = []
 		self.table = []
+		self.winner = 0
 
 	def dealHands(self):
 		for i in range(self.nPlayers):
@@ -33,8 +35,16 @@ class PokerGame():
 		print()
 
 	def findWinner(self):
-		for hand in self.hands:
-			determineHand(hand,self.table)
+		rankings = []
+		for i in range(len(self.hands)):
+			rankings.append(determineHand(self.hands[i],self.table))
+		print(rankings)
+		bestRank = max(rankings, key=lambda x:x[0])
+		winners = [i for i,rank in enumerate(rankings) if rank[0] == bestRank[0]]
+		if len(winners) == 1:
+			print("Player "+str(winners[0]+1)+" wins!")
+		else:
+			print("Need to check best hand some more")
 
 	def newDeck(self):
 		print("NEW DECK")

@@ -1,0 +1,5 @@
+RANKING CHECKS:
+Full House
+Stright/Royal Flush
+Same rank, higher value
+Split pot
