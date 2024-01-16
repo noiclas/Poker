@@ -26,6 +26,18 @@ def findWinner(players, table):
 		rank,bestHand = determineBestHand(possHands)
 		ranks.append(rank)
 		bestHands.append(bestHand)
+	bestRank = np.max(ranks)
+	winnerIdx = np.where(ranks==bestRank)[0][:]
+	if len(winnerIdx) == 1:
+		print("Player",winnerIdx[0]+1,"wins with",rankDict[bestRank])
+	else:
+		for i in range(len(players)):
+			'''
+			need to implement tie breaking/pot splitting
+
+			pot split when players have the exact same rank and/or card values
+			tie breaking when players have same rank
+			'''
 
 def determineBestHand(possHands):
 	# Find the best 5 card hand for each player
