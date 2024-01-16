@@ -30,7 +30,7 @@ class Deck():
 		cards = []
 		for suit in SUITS:
 			for value in VALUES:
-				cards.append((suit,value))
+				cards.append((suit+str(value)))
 		return cards
 
 	def newDeck(self):

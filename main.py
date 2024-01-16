@@ -50,20 +50,20 @@ TABLEY = windowSize[1]/2 - cardHeight/8
 # Blits the currently shared cards on the center of the window
 def draw_table(table):
 	for i in range(len(table)):
-		window.blit(pygame.transform.scale(CARDS[table[i][0]+str(table[i][1])], (cardWidth/4, cardHeight/4)),(TABLEX*(i+1),TABLEY))
+		window.blit(pygame.transform.scale(CARDS[table[i]], (cardWidth/4, cardHeight/4)),(TABLEX*(i+1),TABLEY))
 
 # Blits the players' hands on the window. Only up to 4 players for now
 def draw_hands(hands):
 	for i in range(len(hands)):
 		if i < 2:
-			window.blit(pygame.transform.scale(CARDS[hands[i][0][0]+str(hands[i][0][1])], 
+			window.blit(pygame.transform.scale(CARDS[hands[i][0]], 
 				(cardWidth/4, cardHeight/4)),(TABLEX*(1+3*(i%2)),TABLEY-3*cardHeight/8))
-			window.blit(pygame.transform.scale(CARDS[hands[i][1][0]+str(hands[i][1][1])], 
+			window.blit(pygame.transform.scale(CARDS[hands[i][1]], 
 				(cardWidth/4, cardHeight/4)),(TABLEX*(2+3*(i%2)),TABLEY-3*cardHeight/8))
 		else:
-			window.blit(pygame.transform.scale(CARDS[hands[i][0][0]+str(hands[i][0][1])], 
+			window.blit(pygame.transform.scale(CARDS[hands[i][0]], 
 				(cardWidth/4, cardHeight/4)),(TABLEX*(1+3*(i%2)),TABLEY+3*cardHeight/8))
-			window.blit(pygame.transform.scale(CARDS[hands[i][1][0]+str(hands[i][1][1])], 
+			window.blit(pygame.transform.scale(CARDS[hands[i][1]], 
 				(cardWidth/4, cardHeight/4)),(TABLEX*(2+3*(i%2)),TABLEY+3*cardHeight/8))
 
 		
@@ -73,6 +73,7 @@ def main():
 	game = PokerGame(NPLAYERS)
 	done = False
 	COUNT = 0
+	winner = False
 	HANDS = False
 	while not done:
 		#Event handling
@@ -83,10 +84,14 @@ def main():
 				pass
 			elif event.type == pygame.KEYDOWN:
 				if event.key == pygame.K_SPACE:
-					game.newDeck()
-					COUNT += 1
-
-
+						game.newDeck()
+						COUNT += 1
+		'''
+		game.newDeck()
+		game.dealHands()
+		game.dealFlop()
+		game.dealTurnRiver()
+		game.dealTurnRiver()'''
 		window.fill(GREEN)
 		if COUNT ==1:
 			game.dealHands()
@@ -99,8 +104,8 @@ def main():
 			COUNT += 1
 		elif COUNT == 3:
 			game.dealTurnRiver()
-			COUNT += 1
 			game.findWinner()
+			COUNT += 1
 		else:
 			COUNT =0
 		if HANDS:
@@ -111,18 +116,16 @@ def main():
 		draw_table(game.table)
 		#Update the pygame window
 		pygame.display.update()
+		'''
+		winner=game.findWinner()
+		if winner:
+			time.sleep(100)
+		'''
 
 		#Force FPS to be 60 
 		clk.tick(60)
 
 	pygame.quit()
 	sys.exit()
-	'''
-	game.dealHands()
-	game.dealFlop()
-	game.dealTurnRiver()
-	game.dealTurnRiver()
-	game.GameStatus()
-	game.findWinner()
-	'''
+
 main()

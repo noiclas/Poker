@@ -1,5 +1,6 @@
 import numpy as np
 from deck import Deck
+from player import Player
 from handDeterminer import *
 
 class PokerGame():
@@ -10,13 +11,16 @@ class PokerGame():
 		self.deck = Deck()
 		self.deck.shuffle()
 		self.nPlayers = nPlayers
+		self.players = [Player(i+1) for i in range(nPlayers)]
 		self.hands = []
 		self.table = []
-		self.winner = 0
+		self.winner = None
 
 	def dealHands(self):
 		for i in range(self.nPlayers):
-			self.hands.append(self.deck.dealHand())
+			hand = self.deck.dealHand()
+			self.hands.append(hand)
+			self.players[i].giveHand(hand)
 			print("HAND DEALT")
 
 	def dealFlop(self):
@@ -35,16 +39,8 @@ class PokerGame():
 		print()
 
 	def findWinner(self):
-		rankings = []
-		for i in range(len(self.hands)):
-			rankings.append(determineHand(self.hands[i],self.table))
-		print(rankings)
-		bestRank = max(rankings, key=lambda x:x[0])
-		winners = [i for i,rank in enumerate(rankings) if rank[0] == bestRank[0]]
-		if len(winners) == 1:
-			print("Player "+str(winners[0]+1)+" wins!")
-		else:
-			print("Need to check best hand some more")
+		self.winner = findWinner(self.players,self.table)
+		return self.winner
 
 	def newDeck(self):
 		print("NEW DECK")
@@ -52,3 +48,4 @@ class PokerGame():
 		self.deck.shuffle()
 		self.hands = []
 		self.table = []
+		self.winner = None
