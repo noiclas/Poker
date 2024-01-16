@@ -17,13 +17,15 @@ rankDict = {0:'high card',1:'pair',2:'two pair',3:'three of a kind',4:'straight'
 			6:'full house',7:'four of a kind',8:'straight flush',9:'royal flush'}
 
 def findWinner(players, table):
-	ranks = []
+	ranks = [] # having annoying array/list/ndarray datatype issues
 	bestHands = []
-	for player in players:
-		possHands = list(combinations(player.hand+table,5))
+	for i in range(len(players)):
+		possHands = list(combinations(players[i].hand+table,5))
 		possHands = np.array(possHands)
-		print('player',player.playerNum)
-		bestHands.append(determineBestHand(possHands))
+		print('player',players[i].playerNum)
+		rank,bestHand = determineBestHand(possHands)
+		ranks.append(rank)
+		bestHands.append(bestHand)
 
 def determineBestHand(possHands):
 	# Find the best 5 card hand for each player
@@ -32,24 +34,19 @@ def determineBestHand(possHands):
 	for i in range(len(possHands)):
 		ranks[i] = determineHand(possHands[i])
 	bestRank = np.max(ranks)
-	print('ranks : ',ranks)
 	print('best rank : ',rankDict[bestRank])
 	bestHandIdx = np.where(ranks==bestRank)[0][:]
-	print('best hand indeces : ',bestHandIdx)
 	if len(bestHandIdx) == 1:
-		print('best hand: ',bestHand,'\n')
-		return possHands[bestHandIdx]
+		print('best hand: ',possHands[bestHandIdx[0]],'\n')
+		return bestRank,possHands[bestHandIdx]
 	else:
-		print("CHECKING TIES")
-		tieWinnerIdx = determineSelfTie(bestRank,possHands[bestHandIdx])
-		print("tie winner idx",tieWinnerIdx)
+		tieWinnerIdx = determineTie(bestRank,possHands[bestHandIdx])
 		bestHand = possHands[bestHandIdx][tieWinnerIdx]
 	print('best hand: ',bestHand,'\n')
-	pass
-	#return possHands[bestHandIdx]
+	return bestRank, possHands[bestHandIdx]
 
 
-def determineSelfTie(rank,tiedHands):
+def determineTie(rank,tiedHands):
 	allNums = []
 	allCounts = []
 	for i in range(len(tiedHands)):
@@ -59,6 +56,7 @@ def determineSelfTie(rank,tiedHands):
 		allCounts.append(count)
 		allNums.append(nums)
 	bestHandIdx = 0
+
 	if rank == HIGH_CARD:
 		#need to compare all cards
 		for i in range(1,len(tiedHands)):
@@ -69,12 +67,21 @@ def determineSelfTie(rank,tiedHands):
 				elif allNums[i][j] < allNums[bestHandIdx][j]:
 					break
 		return bestHandIdx
+
 	elif rank == PAIR:
 		#need to compare 3 kickers, pair value is shared for single player possible hands
-		pairVal = allNums[bestHandIdx][np.argmax(allCounts[bestHandIdx])]
-		bestKickers = [num for num in allNums[bestHandIdx] if num!=pairVal]
+		bestPairVal = allNums[bestHandIdx][np.argmax(allCounts[bestHandIdx])]
+		bestKickers = [num for num in allNums[bestHandIdx] if num!=bestPairVal]
 		for i in range(1,len(tiedHands)):
+			pairVal = allNums[i][np.argmax(allCounts[i])]
 			kickers = [num for num in allNums[i] if num!=pairVal]
+			if pairVal > bestPairVal:
+				bestHandIdx = i
+				bestPairVal = pairVal
+				bestKickers = kickers
+				continue
+			elif pairVal < bestPairVal:
+				continue
 			for j in range(2,-1,-1):
 				if kickers[j] > bestKickers[j]:
 					bestHandIdx = i
@@ -83,13 +90,14 @@ def determineSelfTie(rank,tiedHands):
 				elif kickers[j] < bestKickers[j]:
 					break
 		return bestHandIdx
+
 	elif rank == TWO_PAIR:
 		#need to compare the 2 pairs and then last kicker
 		bestTwoPairIdx = np.where(allCounts[bestHandIdx]==2)[0]
 		bestTwoPairVals = [allNums[bestHandIdx][bestTwoPairIdx[0]],allNums[bestHandIdx][bestTwoPairIdx[1]+2]]
 		bestKicker = [num for num in allNums[bestHandIdx] if num not in bestTwoPairVals][0]
 		for i in range(1,len(tiedHands)):
-			twoPairIdx = bestTwoPairIdx = np.where(allCounts[i]==2)[0]
+			twoPairIdx  = np.where(allCounts[i]==2)[0]
 			twoPairVals = [allNums[i][twoPairIdx[0]],allNums[i][twoPairIdx[1]+2]]
 			kicker = [num for num in allNums[i] if num not in twoPairVals][0]
 			if twoPairVals < bestTwoPairVals:
@@ -99,6 +107,7 @@ def determineSelfTie(rank,tiedHands):
 				bestTwoPairVals = twoPairVals
 				bestKicker = kicker
 		return bestHandIdx
+
 	elif rank == THREE_OF_A_KIND:
 		#need to compare 2 kickers, trips will be shared for single player possible hands
 		tripVal = allNums[bestHandIdx][np.argmax(allCounts[bestHandIdx])]
@@ -113,12 +122,14 @@ def determineSelfTie(rank,tiedHands):
 				elif kickers[j] < bestKickers[j]:
 					break
 		return bestHandIdx
+
 	elif rank == STRAIGHT:
 		#only need to compare top card
 		for i in range(1,len(tiedHands)):
 			if allNums[i][4] > allNums[bestHandIdx][4]:
 				bestHandIdx = i
 		return bestHandIdx
+
 	elif rank == FLUSH:
 		#need to compare all cards
 		for i in range(1,len(tiedHands)):
@@ -129,15 +140,47 @@ def determineSelfTie(rank,tiedHands):
 				elif allNums[i][j] < allNums[bestHandIdx][j]:
 					break
 		return bestHandIdx
+
 	elif rank == FULL_HOUSE:
 		#need to compare trips then pair
-		'''
-		bestTripVal =
-		bestPairVal =
-		'''
-		pass
+		bestTripVal = allNums[bestHandIdx][np.argmax(allCounts[bestHandIdx])+2]
+		bestPairVal = [num for num in allNums[bestHandIdx] if num != bestTripVal][0]
+		for i in range(1,len(tiedHands)):
+			tripVal = allNums[i][np.argmax(allCounts[i])+2]
+			pairVal = [num for num in allNums[i] if num !=bestTripVal][0]
+			if tripVal < bestTripVal:
+				continue 
+			elif tripVal > bestTripVal:
+				bestHandIdx = i
+				bestTripVal = tripVal
+				bestPairVal = pairVal
+				continue
+			elif pairVal > bestPairVal:
+				bestHandIdx = i
+		return bestHandIdx
+
+	elif rank == FOUR_OF_A_KIND:
+		#need to compare single kicker
+		bestQuadIdx = np.argmax(allCounts[bestHandIdx])
+		if bestQuadIdx == 0:
+			bestKicker = allNums[bestHandIdx][4]
+		else:
+			bestKicker = allNums[bestHandIdx][0]
+		for i in range(1,len(tiedHands)):
+			quadIdx = np.argmax(allCounts[i])
+			if bestQuadIdx == 0:
+				kicker = allNums[i][4]
+			else:
+				kicker = allNums[i][0]
+			if kicker < bestKicker:
+				continue
+			if kicker > bestKicker:
+				bestHandIdx = i
+				bestKicker = kicker
+		return bestHandIdx
+
 	elif rank == STRAIGHT_FLUSH:
-		#Only need to compare top card
+		#need to compare top card
 		for i in range(1,len(tiedHands)):
 			if allNums[i][4] > allNums[bestHandIdx][4]:
 				bestHandIdx = i

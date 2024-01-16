@@ -21,7 +21,6 @@ class PokerGame():
 			hand = self.deck.dealHand()
 			self.hands.append(hand)
 			self.players[i].giveHand(hand)
-			print("HAND DEALT")
 
 	def dealFlop(self):
 		self.table= self.deck.dealFlop()
@@ -43,7 +42,6 @@ class PokerGame():
 		return self.winner
 
 	def newDeck(self):
-		print("NEW DECK")
 		self.deck.newDeck()
 		self.deck.shuffle()
 		self.hands = []
