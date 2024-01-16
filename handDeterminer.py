@@ -32,18 +32,19 @@ def determineBestHand(possHands):
 	for i in range(len(possHands)):
 		ranks[i] = determineHand(possHands[i])
 	bestRank = np.max(ranks)
-	print('ranks',ranks)
+	print('ranks : ',ranks)
+	print('best rank : ',rankDict[bestRank])
 	bestHandIdx = np.where(ranks==bestRank)[0][:]
-	print('best hand indeces',bestHandIdx)
-	print('best rank',rankDict[bestRank])
+	print('best hand indeces : ',bestHandIdx)
 	if len(bestHandIdx) == 1:
+		print('best hand: ',bestHand,'\n')
 		return possHands[bestHandIdx]
 	else:
 		print("CHECKING TIES")
 		tieWinnerIdx = determineSelfTie(bestRank,possHands[bestHandIdx])
 		print("tie winner idx",tieWinnerIdx)
 		bestHand = possHands[bestHandIdx][tieWinnerIdx]
-	print(bestHand,'\n')
+	print('best hand: ',bestHand,'\n')
 	pass
 	#return possHands[bestHandIdx]
 
@@ -71,20 +72,19 @@ def determineSelfTie(rank,tiedHands):
 	elif rank == PAIR:
 		#need to compare 3 kickers, pair value is shared for single player possible hands
 		pairVal = allNums[bestHandIdx][np.argmax(allCounts[bestHandIdx])]
-		print('pair value:', pairVal)
 		bestKickers = [num for num in allNums[bestHandIdx] if num!=pairVal]
-		print('checking against kickers', bestKickers)
 		for i in range(1,len(tiedHands)):
 			kickers = [num for num in allNums[i] if num!=pairVal]
-			print('new kickers',kickers)
 			for j in range(2,-1,-1):
 				if kickers[j] > bestKickers[j]:
 					bestHandIdx = i
+					bestKickers = kickers
 					break
 				elif kickers[j] < bestKickers[j]:
 					break
 		return bestHandIdx
 	elif rank == TWO_PAIR:
+		#need to compare the 2 pairs and then last kicker
 		bestTwoPairIdx = np.where(allCounts[bestHandIdx]==2)[0]
 		bestTwoPairVals = [allNums[bestHandIdx][bestTwoPairIdx[0]],allNums[bestHandIdx][bestTwoPairIdx[1]+2]]
 		bestKicker = [num for num in allNums[bestHandIdx] if num not in bestTwoPairVals][0]
@@ -96,21 +96,19 @@ def determineSelfTie(rank,tiedHands):
 				continue
 			if twoPairVals > bestTwoPairVals or kicker > bestKicker:
 				bestHandIdx = i
+				bestTwoPairVals = twoPairVals
+				bestKicker = kicker
 		return bestHandIdx
-
-		#need to compare the 2 pairs and then last kicker
-		pass
 	elif rank == THREE_OF_A_KIND:
 		#need to compare 2 kickers, trips will be shared for single player possible hands
 		tripVal = allNums[bestHandIdx][np.argmax(allCounts[bestHandIdx])]
 		bestKickers = [num for num in allNums[bestHandIdx] if num != tripVal]
-		print('checking against kickers', bestKickers)
 		for i in range(1,len(tiedHands)):
 			kickers = [num for num in allNums[i] if num != tripVal]
-			print('new kickers',kickers)
 			for j in range(1,-1,-1):
 				if kickers[j] > bestKickers[j]:
 					bestHandIdx=i
+					beskKickers = kickers
 					break
 				elif kickers[j] < bestKickers[j]:
 					break
@@ -161,6 +159,8 @@ def determineHand(hand):
 		return FULL_HOUSE
 	elif checkFlush(suits):
 		return FLUSH
+	elif checkStraight(nums):
+		return STRAIGHT
 	elif checkThreeOfKind(counts):
 		return THREE_OF_A_KIND
 	elif checkTwoPair(counts):
@@ -180,10 +180,9 @@ def checkStraight(nums):
 	if nums == [2,3,4,5,14]:
 		return True
 	for i in range(4):
-		if nums[i] != nums[i+1] + 1:
+		if nums[i] != nums[i+1] - 1:
 			return False
-		else:
-			return True
+	return True
 
 def checkRoyalFlush(suit,nums):
 	topCard = nums[4]
