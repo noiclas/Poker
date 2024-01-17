@@ -104,6 +104,8 @@ def main():
 			COUNT += 1
 		elif COUNT == 3:
 			game.dealTurnRiver()
+			#force royal flush
+			#game.table = ['s14','s13','s12','s11','s10']
 			game.findWinner()
 			COUNT += 1
 		else:
