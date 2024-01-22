@@ -1,8 +1,0 @@
-RANKING CHECKS:
-Full House
-Stright/Royal Flush
-Same rank, higher value
-Split pot
-
-Look at https://www.adda52.com/poker/poker-rules/cash-game-rules/tie-breaker-rules#:~:text=If%20two%20players%20hold%20the,can%20be%20used%20if%20necessary.
-for all the tie-breaking rules if applicable. Probably easiest to just make a function for each rank or something similar to that.
