@@ -3,6 +3,7 @@ from binaryFuncs import *
 from itertools import combinations
 from collections import defaultdict
 from collections import Counter
+from bitfields import determineBestHand_
 
 HIGH_CARD = 0
 PAIR = 1
@@ -21,6 +22,8 @@ def findWinner(players, table):
 	ranks = np.zeros(len(players))
 	bestHands = np.zeros((len(players),5),dtype=str)
 	binScores = np.zeros(len(players))
+	ranks_ = np.zeros(len(players))
+	binScores_ = np.zeros(len(players))
 	for i in range(len(players)):
 		possHands = list(combinations(players[i].hand+table,5))
 		possHands = np.array(possHands)
@@ -28,6 +31,11 @@ def findWinner(players, table):
 		ranks[i],bestHands[i],handDict = determineBestHand(possHands)
 		binScores[i] = getBinaryScore(ranks[i],handDict)
 		print('binary score:',binScores[i],'\n')
+
+		ranks_[i], binScores_[i] = determineBestHand_(players[i].hand+table)
+		print('\nrank_',rankDict[ranks_[i]])
+		print('binary score_:',binScores_[i],'\n')
+
 	bestRank = np.max(ranks)
 	winnersIdx = np.where(ranks==bestRank)[0][:]
 	print('winnersIdx:',winnersIdx)
@@ -42,7 +50,20 @@ def findWinner(players, table):
 			pass
 		else:
 			print("\nPlayers"," and ".join(map(str,winnersIdx[winnerIdx]+1)),"chop with",rankDict[bestRank])
-		
+
+	bestRank_ = np.max(ranks_)
+	winnersIdx_ = np.where(ranks_==bestRank_)[0][:]
+	print('\nwinnersIdx_:',winnersIdx_)
+	if len(winnersIdx_) == 1:
+		print("\nPlayer",winnersIdx_[0]+1,"wins with",rankDict[bestRank_])
+	else:
+		maxBinScore_ = np.max(binScores_[winnersIdx_])
+		winnerIdx_ = np.where(binScores_[winnersIdx_]==maxBinScore_)[0][:]
+		print("winnerIdx_:",winnerIdx_)
+		if len(winnerIdx_) == 1:
+			print("\nPlayer",winnersIdx_[winnerIdx_[0]]+1,"wins with",rankDict[bestRank_])
+		else:
+			print("\nPlayers"," and ".join(map(str,winnersIdx_[winnerIdx_]+1)),"chop with",rankDict[bestRank_])
 
 def determineBestHand(possHands):
 	# Find the best 5 card hand for each player
@@ -298,3 +319,4 @@ def checkPair(counts):
 		return True
 	else:
 		return False
+

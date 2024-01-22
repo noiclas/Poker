@@ -33,6 +33,7 @@ class PokerGame():
 		for i in range(self.nPlayers):
 			print("player"+str(i+1)+":")
 			print(self.hands[i])
+		print()
 		print("table:" )
 		print(self.table)
 		print()
