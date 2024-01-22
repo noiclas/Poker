@@ -66,8 +66,6 @@ def draw_hands(hands):
 			window.blit(pygame.transform.scale(CARDS[hands[i][1]], 
 				(cardWidth/4, cardHeight/4)),(TABLEX*(2+3*(i%2)),TABLEY+3*cardHeight/8))
 
-		
-
 def main():
 	NPLAYERS = 4
 	game = PokerGame(NPLAYERS)
@@ -96,7 +94,6 @@ def main():
 		if COUNT ==1:
 			game.dealHands()
 			game.dealFlop()
-			game.GameStatus()
 			HANDS = True
 			COUNT +=1
 		elif COUNT == 2:
@@ -106,6 +103,7 @@ def main():
 			game.dealTurnRiver()
 			#force royal flush
 			#game.table = ['s14','s13','s12','s11','s10']
+			game.GameStatus()
 			game.findWinner()
 			COUNT += 1
 		else:
