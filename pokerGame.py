@@ -3,7 +3,7 @@ from deck import Deck
 from player import Player
 from handDeterminer import *
 
-class PokerGame():
+class PokerGame:
 	'''
 	Controls a poker game
 	'''
@@ -15,6 +15,7 @@ class PokerGame():
 		self.hands = []
 		self.table = []
 		self.winner = None
+		self.turn = 0
 
 	def dealHands(self):
 		for i in range(self.nPlayers):
@@ -47,3 +48,7 @@ class PokerGame():
 		self.hands = []
 		self.table = []
 		self.winner = None
+
+	def nextTurn(self):
+		self.turn += 1
+		self.turn %= (nPlayers+1)

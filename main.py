@@ -2,6 +2,7 @@ import pygame
 import sys
 import time
 import numpy as np
+from GraphicalEntities import *
 
 from pokerGame import PokerGame
 
@@ -10,6 +11,7 @@ pygame.font.init()
 pygame.display.set_caption('NIC\'S POKER')
 clk = pygame.time.Clock()
 windowSize = (910,726)
+buttonSize = (200,50)
 
 WHITE = (255,255,255)
 GREEN = (53,101,77)
@@ -39,7 +41,7 @@ CARDS = {'s2':pygame.image.load('cards/s2.png'),'s3':pygame.image.load('cards/s3
 			  'h5':pygame.image.load('cards/h5.png'),'h6':pygame.image.load('cards/h6.png'),'h7':pygame.image.load('cards/h7.png'),
 			  'h8':pygame.image.load('cards/h8.png'),'h9':pygame.image.load('cards/h9.png'),'h10':pygame.image.load('cards/h10.png'),
 			  'h11':pygame.image.load('cards/h11.png'),'h12':pygame.image.load('cards/h12.png'),'h13':pygame.image.load('cards/h13.png'),
-			  'h14':pygame.image.load('cards/h14.png')
+			  'h14':pygame.image.load('cards/h14.png'),'back':pygame.image.load('cards/back7.png')
 			  }
 cardWidth =	CARDS['s2'].get_rect().width
 cardHeight = CARDS['s2'].get_rect().height
@@ -48,12 +50,16 @@ TABLEY = windowSize[1]/2 - cardHeight/8
 
 
 # Blits the currently shared cards on the center of the window
-def draw_table(table):
+def drawTable(game):
+	table = game.table
 	for i in range(len(table)):
 		window.blit(pygame.transform.scale(CARDS[table[i]], (cardWidth/4, cardHeight/4)),(TABLEX*(i+1),TABLEY))
+	for j in range(len(table),5):
+		window.blit(pygame.transform.scale(CARDS['back'],(cardWidth/4, cardHeight/4)),(TABLEX*(j+1),TABLEY))
 
 # Blits the players' hands on the window. Only up to 4 players for now
-def draw_hands(hands):
+def drawHands(game):
+	hands = game.hands
 	for i in range(len(hands)):
 		if i < 2:
 			window.blit(pygame.transform.scale(CARDS[hands[i][0]], 
@@ -66,11 +72,21 @@ def draw_hands(hands):
 			window.blit(pygame.transform.scale(CARDS[hands[i][1]], 
 				(cardWidth/4, cardHeight/4)),(TABLEX*(2+3*(i%2)),TABLEY+3*cardHeight/8))
 
+def draw_player_menu(game):
+	player = game.players[game.turn]
+
+
+
+
 		
 
 def main():
-	NPLAYERS = 4
+	NPLAYERS = 2
 	game = PokerGame(NPLAYERS)
+	foldButton = Button(window,50,windowSize[1]-50,buttonSize[0],buttonSize[1],(128,128,128),'FOLD BUTTON')
+	checkButton = Button(window,50,windowSize[1]-100,buttonSize[0],buttonSize[1],(128,128,128),'CHECK BUTTON')
+	betButton = Button(window,50,windowSize[1]-150,buttonSize[0],buttonSize[1],(128,128,128),'BET BUTTON')
+	playerNameBox = TextRectangle(window,50,windowSize[1]-200,buttonSize[0],buttonSize[1],(128,128,128),'PLAYER NAME')
 	done = False
 	COUNT = 0
 	winner = False
@@ -81,24 +97,29 @@ def main():
 			if event.type == pygame.QUIT:
 				done = True
 			elif event.type == pygame.MOUSEBUTTONDOWN:
-				pass
+				mousePos = pygame.mouse.get_pos()
+				if foldButton.isClicked(mousePos):
+					print("fold pressed")
+				elif checkButton.isClicked(mousePos):
+					print("check pressed")
+				elif betButton.isClicked(mousePos):
+					print('bet pressed')
+				
 			elif event.type == pygame.KEYDOWN:
 				if event.key == pygame.K_SPACE:
 						game.newDeck()
 						COUNT += 1
-		'''
-		game.newDeck()
-		game.dealHands()
-		game.dealFlop()
-		game.dealTurnRiver()
-		game.dealTurnRiver()'''
 		window.fill(GREEN)
+		foldButton.draw()
+		checkButton.draw()
+		betButton.draw()
+		playerNameBox.draw()
 		if COUNT ==1:
 			game.dealHands()
 			game.dealFlop()
 			game.GameStatus()
 			HANDS = True
-			COUNT +=1
+			COUNT =-1
 		elif COUNT == 2:
 			game.dealTurnRiver()
 			COUNT += 1
@@ -111,11 +132,11 @@ def main():
 		else:
 			COUNT =0
 		if HANDS:
-			draw_hands(game.hands)
+			drawHands(game)
 			#window.blit(pygame.transform.scale(CARDS[game.hands[0][0][0]+str(game.hands[0][0][1])], (cardWidth/4, cardHeight/4)),(TABLEX*(1),TABLEY+cardHeight/4))
 			#window.blit(pygame.transform.scale(CARDS[game.hands[0][1][0]+str(game.hands[0][1][1])], (cardWidth/4, cardHeight/4)),(TABLEX*(2),TABLEY+cardHeight/4))
 
-		draw_table(game.table)
+		drawTable(game)
 		#Update the pygame window
 		pygame.display.update()
 		'''

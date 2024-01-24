@@ -4,7 +4,7 @@ import random
 SUITS = ['s','c','d','h']
 VALUES = np.arange(2,15)
 
-class Deck():
+class Deck:
 	'''
 	Represents a standard deck of 52 cards
 
