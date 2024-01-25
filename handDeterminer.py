@@ -24,25 +24,26 @@ def findWinner(players, table):
 	for i in range(len(players)):
 		possHands = list(combinations(players[i].hand+table,5))
 		possHands = np.array(possHands)
-		print('player',players[i].playerNum)
+		print('\n'+players[i].name+':')
 		ranks[i],bestHands[i],handDict = determineBestHand(possHands)
 		binScores[i] = getBinaryScore(ranks[i],handDict)
-		print('binary score:',binScores[i],'\n')
+		print('binary score:',binScores[i])
 	bestRank = np.max(ranks)
 	winnersIdx = np.where(ranks==bestRank)[0][:]
 	print('winnersIdx:',winnersIdx)
 	if len(winnersIdx) == 1:
-		print("\nPlayer",winnersIdx[0]+1,"wins with",rankDict[bestRank])
+		print("\n"+players[winnersIdx[0]].name+" wins with "+rankDict[bestRank])
+		return [players[winnersIdx[0]]]
 	else:
 		maxBinScore = np.max(binScores[winnersIdx])
 		winnerIdx = np.where(binScores[winnersIdx]==maxBinScore)[0][:]
 		print("winnerIdx:",winnerIdx)
 		if len(winnerIdx) == 1:
-			print("\nPlayer",winnersIdx[winnerIdx][0]+1,"wins with",rankDict[bestRank])
-			pass
+			print("\nPlayer",players[winnersIdx[winnerIdx][0]].name,"wins with",rankDict[bestRank])
+			return [players[winnersIdx[winnerIdx][0]]]
 		else:
-			print("\nPlayers"," and ".join(map(str,winnersIdx[winnerIdx]+1)),"chop with",rankDict[bestRank])
-		
+			print("\nPlayers"," and ".join(map(str,players[winnersIdx[winnerIdx]])),"chop with",rankDict[bestRank])
+			return players[winnersIdx[winnerIdx]]
 
 def determineBestHand(possHands):
 	# Find the best 5 card hand for each player

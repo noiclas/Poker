@@ -9,6 +9,7 @@ class Player:
 		self.name = name
 		self.stack = stack
 		self.playing = True
+		self.betting = False
 
 	def giveHand(self,hand):
 		self.hand = hand
@@ -21,3 +22,6 @@ class Player:
 
 	def setRank(self,rank):
 		self.rank = rank
+
+	def changeBettingStatus(self):
+		self.betting != self.betting

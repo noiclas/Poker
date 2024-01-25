@@ -74,12 +74,18 @@ def drawHands(game):
 			window.blit(pygame.transform.scale(CARDS[hands[i][1]], 
 				(cardWidth/4, cardHeight/4)),(TABLEX*(2+3*(i%2)),TABLEY+3*cardHeight/8))
 
-def drawPlayerView(game):
-	player = game.players[game.turn]
-	window.blit(pygame.transform.scale(CARDS[player.hand[0]], 
-				(cardWidth/4, cardHeight/4)),(windowSize[0]/2-cardWidth/4,windowSize[1]-cardHeight/4))
-	window.blit(pygame.transform.scale(CARDS[player.hand[1]], 
-				(cardWidth/4, cardHeight/4)),(windowSize[0]/2,windowSize[1]-cardHeight/4))
+def drawPlayerView(player):
+	if player.hand == []:
+		pass
+	else:
+		window.blit(pygame.transform.scale(CARDS[player.hand[0]], 
+					(cardWidth/4, cardHeight/4)),(windowSize[0]/2-cardWidth/4,windowSize[1]-cardHeight/4))
+		window.blit(pygame.transform.scale(CARDS[player.hand[1]], 
+					(cardWidth/4, cardHeight/4)),(windowSize[0]/2,windowSize[1]-cardHeight/4))
+		window.blit(pygame.transform.scale(CARDS['back'], 
+					(cardWidth/4, cardHeight/4)),(windowSize[0]/2-cardWidth/4,0))
+		window.blit(pygame.transform.scale(CARDS['back'], 
+					(cardWidth/4, cardHeight/4)),(windowSize[0]/2,0))
 
 
 
@@ -94,6 +100,7 @@ def main():
 	foldButton = Button(window,50,windowSize[1]-150,buttonSize[0],buttonSize[1],DARK_GREEN,'FOLD BUTTON')
 	checkButton = Button(window,50,windowSize[1]-200,buttonSize[0],buttonSize[1],DARK_GREEN,'CHECK BUTTON')
 	betButton = Button(window,50,windowSize[1]-100,buttonSize[0],buttonSize[1],DARK_GREEN,'BET BUTTON')
+	callButton = Button(window,50,windowSize[1]-50,buttonSize[0],buttonSize[1],DARK_GREEN,'CALL BUTTON')
 	playerNameBox = TextRectangle(window,windowSize[0]/2-100,windowSize[1]-250,buttonSize[0],buttonSize[1],GREEN,'PLAYER NAME BOX')
 	potBox = TextRectangle(window,windowSize[0]-50-buttonSize[0],windowSize[1]-150,buttonSize[0],buttonSize[1],GREEN,"POT : 0",35)
 	stackBox = TextRectangle(window,windowSize[0]-50-buttonSize[0],windowSize[1]-100,buttonSize[0],buttonSize[1],GREEN,"STACK TEXT BOX",35)
@@ -101,9 +108,12 @@ def main():
 	done = False
 	COUNT = 0
 	roundCounter = 0
+	prevBet = 0
+	prevRaise=0
 	winner = False
 	HANDS = False
-	betting = False
+	showBetBox = False
+	game.newRound()
 	while not done:
 		#Event handling
 		for event in pygame.event.get():
@@ -114,75 +124,75 @@ def main():
 				if foldButton.isClicked(mousePos):
 					print(game.playerUp.name,"folds")
 					game.foldPlayer()
-					game.nextTurn()
-					betting = False
+					game.nextPlayer()
+					showBetBox = False
 				elif checkButton.isClicked(mousePos):
-					print(game.playerUp.name,"checks")
-					game.nextTurn()
-					betting = False
+					if not game.bettingRound:
+						print(game.playerUp.name,"checks")
+						game.addReadyPlayer()
+						game.nextPlayer()
+						showBetBox = False
 				elif betButton.isClicked(mousePos):
 					print(game.playerUp.name,"is betting")
 					betEntryBox.active = True
-					betting = True
+					showBetBox = True
+				elif callButton.isClicked(mousePos):
+					if game.bettingRound:
+						print(game.playerUp.name+" calls for "+str(prevBet))
+						game.playerUp.bet(prevBet)
+						game.addToPot(prevBet)
+						potBox.updateText("POT : "+str(game.pot))
+						game.addReadyPlayer()
+						game.nextPlayer()
+						showBetBox = False
 			elif event.type == pygame.KEYDOWN:
 				if event.key == pygame.K_SPACE:
-						game.newRound()
+						#game.newRound()
+						game.GameStatus()
 						COUNT += 1
 				bet = int(betEntryBox.enterText(event))
-				if bet > 0:
+				if bet > 0 and bet <= game.playerUp.stack and bet >= prevBet+prevRaise:
+					prevRaise = bet - prevBet
+					prevBet = bet
+					print(game.playerUp.name+" bets for "+str(bet)+"\n(raise by "+str(prevRaise)+')')
 					game.playerUp.bet(bet)
 					game.addToPot(bet)
 					potBox.updateText("POT : "+str(game.pot))
+					game.resetReadyPlayers()
+					game.nextPlayer()
+					game.bettingRound = True
+					showBetBox = False
 
 		window.fill(GREEN)
 		foldButton.draw()
-		checkButton.draw()
+		#checkButton.draw()
 		betButton.draw()
 		playerNameBox.updateText(game.players[game.turn].name)
 		playerNameBox.draw()
 		potBox.draw()
 		stackBox.updateText("STACK : "+str(game.players[game.turn].stack))
 		stackBox.draw()
-		if betting:
+
+		if showBetBox:
 			betEntryBox.draw()
-
-		if COUNT ==1:
-			'''
-			game.dealHands()
-			game.dealFlop()
-			game.GameStatus()
-			HANDS = True
-			'''
-			game.dealHands()
-			drawPlayerView(game)
-			COUNT =-1
-		if COUNT ==-1:
-			drawPlayerView(game)
-		elif COUNT == 2:
-			game.dealTurnRiver()
-			COUNT += 1
-		elif COUNT == 3:
-			game.dealTurnRiver()
-			#force royal flush
-			#game.table = ['s14','s13','s12','s11','s10']
-			game.findWinner()
-			COUNT += 1
+		if game.bettingRound and not showBetBox:
+			callButton.draw()
+		elif game.bettingRound and showBetBox:
+			betEntryBox.draw()
 		else:
-			COUNT =0
-		if HANDS:
-			drawHands(game)
-			#window.blit(pygame.transform.scale(CARDS[game.hands[0][0][0]+str(game.hands[0][0][1])], (cardWidth/4, cardHeight/4)),(TABLEX*(1),TABLEY+cardHeight/4))
-			#window.blit(pygame.transform.scale(CARDS[game.hands[0][1][0]+str(game.hands[0][1][1])], (cardWidth/4, cardHeight/4)),(TABLEX*(2),TABLEY+cardHeight/4))
+			checkButton.draw()
 
+		if game.playersReady == game.playersLeft:
+			if len(game.table) == 5:
+				potBox.updateText('POT : 0')
+			game.nextStage()
+			prevBet, prevRaise = 0,0
+			game.bettingRound = False
+
+		drawPlayerView(game.playerUp)
 		drawTable(game)
-		#game.nextTurn()
 		#Update the pygame window
 		pygame.display.update()
-		'''
-		winner=game.findWinner()
-		if winner:
-			time.sleep(100)
-		'''
 
 		#Force FPS to be 60 
 		clk.tick(60)

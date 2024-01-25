@@ -3,6 +3,10 @@ from deck import Deck
 from player import Player
 from handDeterminer import *
 
+SMALL_BLIND = 5
+BIG_BLIND = 10
+STAGES = ['PRE FLOP','FLOP','TURN','RIVER']
+
 class PokerGame:
 	'''
 	Controls a poker game
@@ -15,11 +19,13 @@ class PokerGame:
 		self.players = np.copy(self.Allplayers)
 		self.hands = []
 		self.table = []
-		self.winner = None
 		self.turn = 0
 		self.pot = 0
 		self.playerUp = self.players[self.turn]
 		self.playersLeft = len(self.players)
+		self.dealerIdx = 0
+		self.bettingRound = False
+		self.playersReady = 0
 
 	def dealHands(self):
 		for i in range(self.nPlayers):
@@ -43,8 +49,11 @@ class PokerGame:
 		print()
 
 	def findWinner(self):
-		self.winner = findWinner(self.players,self.table)
-		return self.winner
+		winner = findWinner(self.players,self.table)
+		#winner = findWinner(self.players,['c10','c11','c12','c13','c14']) this is for chop testing
+		for player in winner:
+			player.winPot(self.pot/len(winner))
+			print(player.name+" wins "+str(self.pot/len(winner)))
 
 	def newRound(self):
 		print("Starting New Round")
@@ -53,11 +62,15 @@ class PokerGame:
 		self.players = np.copy(self.Allplayers)
 		self.playersLeft = self.nPlayers
 		self.hands = []
+		self.dealHands()
 		self.table = []
-		self.winner = None
 		self.pot = 0
+		self.dealerIdx += 1
+		self.dealerIdx %= self.nPlayers
+		self.bettingRound = False
+		self.playersReady = 0
 
-	def nextTurn(self):
+	def nextPlayer(self):
 		self.turn += 1
 		self.turn %= self.playersLeft
 		self.playerUp = self.players[self.turn]
@@ -76,3 +89,24 @@ class PokerGame:
 
 	def addToPot(self,bet):
 		self.pot += bet
+
+	def nextStage(self):
+		if len(self.table) == 0:
+			print("\nDealing Flop")
+			self.dealFlop()
+		elif len(self.table) == 3:
+			print("\nDealing Turn")
+			self.dealTurnRiver()
+		elif len(self.table) == 4:
+			print("\nDealing River")
+			self.dealTurnRiver()
+		else:
+			self.findWinner()
+			self.newRound()
+		self.playersReady = 0
+
+	def addReadyPlayer(self):
+		self.playersReady += 1
+
+	def resetReadyPlayers(self):
+		self.playersReady = 1
