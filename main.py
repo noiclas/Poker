@@ -93,11 +93,18 @@ def drawPlayerView(player):
 		
 
 def main():
-	NPLAYERS = 3
+	try:
+		NPLAYERS = int(input('How many players?\n'))
+	except ValueError:
+		print('Please input an integer number of players')
 	game = PokerGame(NPLAYERS)
+	for i in range(NPLAYERS):
+		game.Allplayers[i].name = input('Player '+str(i+1)+' name\n')
+	'''
 	game.Allplayers[0].name = 'cracker'
 	game.Allplayers[1].name = 'goober'
 	game.Allplayers[2].name = 'francis'
+	'''
 	foldButton = Button(window,50,windowSize[1]-150,buttonSize[0],buttonSize[1],DARK_GREEN,'FOLD')
 	checkButton = Button(window,50,windowSize[1]-200,buttonSize[0],buttonSize[1],DARK_GREEN,'CHECK')
 	betButton = Button(window,50,windowSize[1]-100,buttonSize[0],buttonSize[1],DARK_GREEN,'BET')
