@@ -93,14 +93,15 @@ def drawPlayerView(player):
 		
 
 def main():
-	NPLAYERS = 2
+	NPLAYERS = 3
 	game = PokerGame(NPLAYERS)
 	game.Allplayers[0].name = 'cracker'
 	game.Allplayers[1].name = 'goober'
-	foldButton = Button(window,50,windowSize[1]-150,buttonSize[0],buttonSize[1],DARK_GREEN,'FOLD BUTTON')
-	checkButton = Button(window,50,windowSize[1]-200,buttonSize[0],buttonSize[1],DARK_GREEN,'CHECK BUTTON')
-	betButton = Button(window,50,windowSize[1]-100,buttonSize[0],buttonSize[1],DARK_GREEN,'BET BUTTON')
-	callButton = Button(window,50,windowSize[1]-50,buttonSize[0],buttonSize[1],DARK_GREEN,'CALL BUTTON')
+	game.Allplayers[2].name = 'francis'
+	foldButton = Button(window,50,windowSize[1]-150,buttonSize[0],buttonSize[1],DARK_GREEN,'FOLD')
+	checkButton = Button(window,50,windowSize[1]-200,buttonSize[0],buttonSize[1],DARK_GREEN,'CHECK')
+	betButton = Button(window,50,windowSize[1]-100,buttonSize[0],buttonSize[1],DARK_GREEN,'BET')
+	callButton = Button(window,50,windowSize[1]-50,buttonSize[0],buttonSize[1],DARK_GREEN,'CALL')
 	playerNameBox = TextRectangle(window,windowSize[0]/2-100,windowSize[1]-250,buttonSize[0],buttonSize[1],GREEN,'PLAYER NAME BOX')
 	potBox = TextRectangle(window,windowSize[0]-50-buttonSize[0],windowSize[1]-150,buttonSize[0],buttonSize[1],GREEN,"POT : 0",35)
 	stackBox = TextRectangle(window,windowSize[0]-50-buttonSize[0],windowSize[1]-100,buttonSize[0],buttonSize[1],GREEN,"STACK TEXT BOX",35)
