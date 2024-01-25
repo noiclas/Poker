@@ -15,6 +15,8 @@ buttonSize = (200,50)
 
 WHITE = (255,255,255)
 GREEN = (53,101,77)
+DARK_GREEN = (0,102,0)
+GREY = (128,128,128)
 
 #Set font and font size for any text in the game
 font = pygame.font.Font('freesansbold.ttf',20)
@@ -72,8 +74,12 @@ def drawHands(game):
 			window.blit(pygame.transform.scale(CARDS[hands[i][1]], 
 				(cardWidth/4, cardHeight/4)),(TABLEX*(2+3*(i%2)),TABLEY+3*cardHeight/8))
 
-def draw_player_menu(game):
+def drawPlayerView(game):
 	player = game.players[game.turn]
+	window.blit(pygame.transform.scale(CARDS[player.hand[0]], 
+				(cardWidth/4, cardHeight/4)),(windowSize[0]/2-cardWidth/4,windowSize[1]-cardHeight/4))
+	window.blit(pygame.transform.scale(CARDS[player.hand[1]], 
+				(cardWidth/4, cardHeight/4)),(windowSize[0]/2,windowSize[1]-cardHeight/4))
 
 
 
@@ -83,14 +89,21 @@ def draw_player_menu(game):
 def main():
 	NPLAYERS = 2
 	game = PokerGame(NPLAYERS)
-	foldButton = Button(window,50,windowSize[1]-50,buttonSize[0],buttonSize[1],(128,128,128),'FOLD BUTTON')
-	checkButton = Button(window,50,windowSize[1]-100,buttonSize[0],buttonSize[1],(128,128,128),'CHECK BUTTON')
-	betButton = Button(window,50,windowSize[1]-150,buttonSize[0],buttonSize[1],(128,128,128),'BET BUTTON')
-	playerNameBox = TextRectangle(window,50,windowSize[1]-200,buttonSize[0],buttonSize[1],(128,128,128),'PLAYER NAME')
+	game.Allplayers[0].name = 'cracker'
+	game.Allplayers[1].name = 'goober'
+	foldButton = Button(window,50,windowSize[1]-150,buttonSize[0],buttonSize[1],DARK_GREEN,'FOLD BUTTON')
+	checkButton = Button(window,50,windowSize[1]-200,buttonSize[0],buttonSize[1],DARK_GREEN,'CHECK BUTTON')
+	betButton = Button(window,50,windowSize[1]-100,buttonSize[0],buttonSize[1],DARK_GREEN,'BET BUTTON')
+	playerNameBox = TextRectangle(window,windowSize[0]/2-100,windowSize[1]-250,buttonSize[0],buttonSize[1],GREEN,'PLAYER NAME BOX')
+	potBox = TextRectangle(window,windowSize[0]-50-buttonSize[0],windowSize[1]-150,buttonSize[0],buttonSize[1],GREEN,"POT : 0",35)
+	stackBox = TextRectangle(window,windowSize[0]-50-buttonSize[0],windowSize[1]-100,buttonSize[0],buttonSize[1],GREEN,"STACK TEXT BOX",35)
+	betEntryBox = TextEntryBox(window,50,windowSize[1]-50,buttonSize[0],buttonSize[1],GREEN,35)
 	done = False
 	COUNT = 0
+	roundCounter = 0
 	winner = False
 	HANDS = False
+	betting = False
 	while not done:
 		#Event handling
 		for event in pygame.event.get():
@@ -99,27 +112,52 @@ def main():
 			elif event.type == pygame.MOUSEBUTTONDOWN:
 				mousePos = pygame.mouse.get_pos()
 				if foldButton.isClicked(mousePos):
-					print("fold pressed")
+					print(game.playerUp.name,"folds")
+					game.foldPlayer()
+					game.nextTurn()
+					betting = False
 				elif checkButton.isClicked(mousePos):
-					print("check pressed")
+					print(game.playerUp.name,"checks")
+					game.nextTurn()
+					betting = False
 				elif betButton.isClicked(mousePos):
-					print('bet pressed')
-				
+					print(game.playerUp.name,"is betting")
+					betEntryBox.active = True
+					betting = True
 			elif event.type == pygame.KEYDOWN:
 				if event.key == pygame.K_SPACE:
-						game.newDeck()
+						game.newRound()
 						COUNT += 1
+				bet = int(betEntryBox.enterText(event))
+				if bet > 0:
+					game.playerUp.bet(bet)
+					game.addToPot(bet)
+					potBox.updateText("POT : "+str(game.pot))
+
 		window.fill(GREEN)
 		foldButton.draw()
 		checkButton.draw()
 		betButton.draw()
+		playerNameBox.updateText(game.players[game.turn].name)
 		playerNameBox.draw()
+		potBox.draw()
+		stackBox.updateText("STACK : "+str(game.players[game.turn].stack))
+		stackBox.draw()
+		if betting:
+			betEntryBox.draw()
+
 		if COUNT ==1:
+			'''
 			game.dealHands()
 			game.dealFlop()
 			game.GameStatus()
 			HANDS = True
+			'''
+			game.dealHands()
+			drawPlayerView(game)
 			COUNT =-1
+		if COUNT ==-1:
+			drawPlayerView(game)
 		elif COUNT == 2:
 			game.dealTurnRiver()
 			COUNT += 1
@@ -137,6 +175,7 @@ def main():
 			#window.blit(pygame.transform.scale(CARDS[game.hands[0][1][0]+str(game.hands[0][1][1])], (cardWidth/4, cardHeight/4)),(TABLEX*(2),TABLEY+cardHeight/4))
 
 		drawTable(game)
+		#game.nextTurn()
 		#Update the pygame window
 		pygame.display.update()
 		'''

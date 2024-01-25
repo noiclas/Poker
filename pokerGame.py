@@ -11,11 +11,15 @@ class PokerGame:
 		self.deck = Deck()
 		self.deck.shuffle()
 		self.nPlayers = nPlayers
-		self.players = [Player(i+1) for i in range(nPlayers)]
+		self.Allplayers = [Player(i+1) for i in range(nPlayers)]
+		self.players = np.copy(self.Allplayers)
 		self.hands = []
 		self.table = []
 		self.winner = None
 		self.turn = 0
+		self.pot = 0
+		self.playerUp = self.players[self.turn]
+		self.playersLeft = len(self.players)
 
 	def dealHands(self):
 		for i in range(self.nPlayers):
@@ -42,13 +46,33 @@ class PokerGame:
 		self.winner = findWinner(self.players,self.table)
 		return self.winner
 
-	def newDeck(self):
+	def newRound(self):
+		print("Starting New Round")
 		self.deck.newDeck()
 		self.deck.shuffle()
+		self.players = np.copy(self.Allplayers)
+		self.playersLeft = self.nPlayers
 		self.hands = []
 		self.table = []
 		self.winner = None
+		self.pot = 0
 
 	def nextTurn(self):
 		self.turn += 1
-		self.turn %= (nPlayers+1)
+		self.turn %= self.playersLeft
+		self.playerUp = self.players[self.turn]
+
+	def removePlayer(self,playerIdx):
+		del self.Allplayers[playerIdx]
+		self.nPlayers -= 1
+
+	def foldPlayer(self):
+		self.players = np.delete(self.players,self.turn)
+		self.turn -= 1
+		self.playersLeft -= 1
+		if self.playersLeft == 1:
+			print(self.players[0].name,"wins!")
+			self.newRound()
+
+	def addToPot(self,bet):
+		self.pot += bet
